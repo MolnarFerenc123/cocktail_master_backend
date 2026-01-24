@@ -15,7 +15,7 @@ MakingStepModel.belongsTo(ActionModel, { foreignKey: 'action_id' });
 module.exports = {
     sequelize,
     CocktailModel,
-    IngredienModelt,
+    IngredientModel,
     UnitModel,
     ActionModel,
     MakingStepModel

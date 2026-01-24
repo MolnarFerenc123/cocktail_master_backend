@@ -8,7 +8,7 @@ exports.getDetail = async (req, res) => {
 
         const result = await useCase.execute(req.params.id);
 
-        if (!result) return res.status(404).json({ message: 'Nincs ilyen' });
+        if (!result) return res.status(404).json({ message: 'No coctail exists with this id' });
         
         res.json(result);
     } catch (err) {

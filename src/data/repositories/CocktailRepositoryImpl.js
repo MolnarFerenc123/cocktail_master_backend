@@ -1,28 +1,54 @@
 const CocktailRepository = require('../../domain/repositories/CocktailRepository');
-const { Cocktail: SeqCocktail, MakingStep, Action, Ingredient, Unit } = require('../datasources/models');
+const Cocktail = require('../../domain/models/Cocktail');
+
+const { 
+    CocktailModel, 
+    MakingStepModel, 
+    ActionModel, 
+    IngredientModel, 
+    UnitModel 
+} = require('../models'); 
 
 class CocktailRepositoryImpl extends CocktailRepository {
+    
     async getById(id) {
-        // 1. Adatbázis lekérdezés (Sequelize)
-        const dbResult = await SeqCocktail.findByPk(id, {
-             include: [{
-                model: MakingStep,
-                include: [Action, Ingredient, Unit]
+        const dbCocktail = await CocktailModel.findByPk(id, {
+            include: [{
+                model: MakingStepModel,
+                include: [
+                    { model: ActionModel },
+                    { model: IngredientModel },
+                    { model: UnitModel }
+                ]
             }],
-            order: [[MakingStep, 'step_number', 'ASC']]
+            order: [[MakingStepModel, 'step_number', 'ASC']]
         });
 
-        if (!dbResult) return null;
+        if (!dbCocktail) return null;
 
-        const steps = dbResult.MakingSteps.map(step => {
-            return { 
-                description: 'Kész, behelyettesített szöveg', 
-                actionId: step.action_id 
+        const steps = dbCocktail.MakingSteps.map(step => {
+            return {
+                stepId: step.making_step_id,
+                stepNumber: step.step_number,
+                actionId: step.action_id,
+                
+                description: step.Action ? step.Action.description : '', 
+                
+                details: {
+                    ingredient: step.Ingredient ? step.Ingredient.name : null,
+                    amount: step.ingredient_amount || null,
+                    unit: step.Unit ? step.Unit.unit : null
+                }
             };
         });
 
-        const { Cocktail } = require('../../domain/models/Cocktail');
-        return new Cocktail(dbResult.cocktail_id, dbResult.name, dbResult.virgin, steps);
+        return new Cocktail({
+            id: dbCocktail.cocktail_id,
+            name: dbCocktail.name,
+            isVirgin: !!dbCocktail.virgin,
+            steps: steps
+        });
     }
 }
+
 module.exports = CocktailRepositoryImpl;

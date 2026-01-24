@@ -7,4 +7,5 @@ class GetCocktailDetailUseCase {
         return await this.cocktailRepository.getById(id);
     }
 }
-module.exports = GetCocktailDetail;
+
+module.exports = GetCocktailDetailUseCase;
