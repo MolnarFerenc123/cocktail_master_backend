@@ -3,7 +3,9 @@ class Cocktail {
         this.id = id;
         this.name = name;
         this.isVirgin = isVirgin;
-        this.steps = steps || [];
+        if (steps) {
+            this.steps = steps
+        }
     }
 }
 module.exports = Cocktail;

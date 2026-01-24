@@ -1,5 +1,6 @@
 const CocktailRepository = require('../../domain/repositories/CocktailRepository');
 const Cocktail = require('../../domain/models/Cocktail');
+const Ingredient = require('../../domain/models/Ingredient');
 
 const { 
     CocktailModel, 
@@ -10,7 +11,7 @@ const {
 } = require('../models'); 
 
 class CocktailRepositoryImpl extends CocktailRepository {
-    
+
     async getById(id) {
         const dbCocktail = await CocktailModel.findByPk(id, {
             include: [{
@@ -42,12 +43,37 @@ class CocktailRepositoryImpl extends CocktailRepository {
             };
         });
 
-        return new Cocktail({
-            id: dbCocktail.cocktail_id,
-            name: dbCocktail.name,
-            isVirgin: !!dbCocktail.virgin,
-            steps: steps
-        });
+        return new Cocktail(dbCocktail.cocktail_id, dbCocktail.name, !!dbCocktail.virgin, steps);
+    }
+
+    async getAllCocktails() {
+        const dbCocktail = await CocktailModel.findAll();
+
+        if (!dbCocktail) return null;
+
+        return dbCocktail.map( cocktailModel => {
+            return new Cocktail(cocktailModel.cocktail_id, cocktailModel.name, cocktailModel.virgin, null)
+        })
+    }
+
+    async getAllIngredients() {
+        const dbIngredient = await IngredientModel.findAll();
+
+        if (!dbIngredient) return null;
+
+        return dbIngredient.map( ingredientModel => {
+            return new Ingredient(ingredientModel.ingredient_id, ingredientModel.name)
+        })
+    }
+
+    async getCoctailsWithFilter() {
+        const dbIngredient = await IngredientModel.findAll();
+
+        if (!dbIngredient) return null;
+
+        return dbIngredient.map( ingredientModel => {
+            return new Ingredient(ingredientModel.ingredient_id, ingredientModel.name)
+        })
     }
 }
 
