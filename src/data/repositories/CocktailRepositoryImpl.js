@@ -75,6 +75,74 @@ class CocktailRepositoryImpl extends CocktailRepository {
             return new Ingredient(ingredientModel.ingredient_id, ingredientModel.name)
         })
     }
+
+    async search(filters) {
+        const Fuse = require('fuse.js');
+        
+        const whereClause = {};
+
+        if (filters.isVirgin !== undefined && filters.isVirgin !== null) {
+            whereClause.virgin = filters.isVirgin;
+        }
+
+        const dbCocktails = await CocktailModel.findAll({
+            where: whereClause,
+            include: [{
+                model: MakingStepModel,
+                include: [{ model: IngredientModel }]
+            }]
+        });
+
+        let results = dbCocktails.map(dbItem => {
+            const ingredientIds = dbItem.MakingSteps
+                .map(step => step.Ingredient ? step.Ingredient.ingredient_id : null)
+                .filter(id => id !== null);
+
+            const cocktail = new Cocktail(
+                dbItem.cocktail_id,
+                dbItem.name,
+                !!dbItem.virgin,
+                null
+            );
+            
+            cocktail._ingredientIds = ingredientIds; 
+            return cocktail;
+        });
+
+        if (filters.name) {
+            const options = {
+                keys: ['name'],
+                threshold: 0.4,
+                minMatchCharLength: 2
+            };
+
+            const fuse = new Fuse(results, options);
+
+            results = fuse.search(filters.name).map(result => result.item);
+        }
+
+        if (filters.ingredientIds && filters.ingredientIds.length > 0) {
+            const userIngredients = filters.ingredientIds.map(id => parseInt(id));
+
+            results = results.map(cocktail => {
+                const matchCount = cocktail._ingredientIds.filter(id => 
+                    userIngredients.includes(id)
+                ).length;
+
+                cocktail._matchCount = matchCount;
+                return cocktail;
+            });
+
+            results = results.filter(c => c._matchCount > 0);
+            results.sort((a, b) => b._matchCount - a._matchCount);
+        }
+
+        return results.map(c => {
+            delete c._ingredientIds;
+            delete c._matchCount;
+            return c;
+        });
+    }
 }
 
 module.exports = CocktailRepositoryImpl;

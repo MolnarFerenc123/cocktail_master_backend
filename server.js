@@ -12,18 +12,18 @@ app.use(express.json());
 app.use('/api/cocktails', cocktailRoutes);
 
 app.get('/', (req, res) => {
-    res.send('A Koktél Backend Működik! 🍸');
+    res.send('CoctailMaster Backend is running.');
 });
 
 const PORT = process.env.PORT || 5000;
 
 sequelize.authenticate()
     .then(() => {
-        console.log('✅ Sikeres kapcsolat a MySQL adatbázissal!');
+        console.log('Successfully connected to MySQL database.');
         app.listen(PORT, () => {
-            console.log(`🚀 Szerver fut: http://localhost:${PORT}`);
+            console.log(`Server is running at: http://localhost:${PORT}`);
         });
     })
     .catch(err => {
-        console.error('❌ Nem sikerült csatlakozni az adatbázishoz:', err);
+        console.error(`Couldn't connect to database: `, err);
     });
