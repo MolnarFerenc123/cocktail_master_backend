@@ -12,17 +12,31 @@ exports.register = async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res
+        .status(400)
+        .json({ error: "Please enter a valid email address" });
+    }
+
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords do not match" });
     }
 
     if (password.length < 8) {
-      return res.status(400).json({ error: "Password must be at least 8 characters long" });
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 8 characters long" });
     }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
     if (!passwordRegex.test(password)) {
-      return res.status(400).json({ error: "Password must contain at least one uppercase letter, one lowercase letter, and one number" });
+      return res
+        .status(400)
+        .json({
+          error:
+            "Password must contain at least one uppercase letter, one lowercase letter, and one number",
+        });
     }
 
     const useCase = new RegisterUserUseCase(userRepository);
