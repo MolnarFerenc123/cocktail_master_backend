@@ -92,6 +92,12 @@ The server will run on the port defined in your `.env` file (default: `3001`).
 GET /api/cocktails/search?name=margarita&virgin=true&ingredients=1,2,3
 ```
 
+## Frontend Repository
+
+The frontend for this project is available at:
+
+https://github.com/MolnarFerenc123/cocktail_master_frontend
+
 ## Notes
 
 - The application uses a clean separation between presentation, domain, and data layers.
